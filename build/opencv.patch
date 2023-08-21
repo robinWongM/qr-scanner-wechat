@@ -1,3 +1,84 @@
+diff --git a/modules/core/include/opencv2/core/utils/filesystem.private.hpp b/modules/core/include/opencv2/core/utils/filesystem.private.hpp
+index c32be15..9910858 100644
+--- a/modules/core/include/opencv2/core/utils/filesystem.private.hpp
++++ b/modules/core/include/opencv2/core/utils/filesystem.private.hpp
+@@ -7,12 +7,13 @@
+ 
+ // TODO Move to CMake?
+ #ifndef OPENCV_HAVE_FILESYSTEM_SUPPORT
+-#  if defined(__EMSCRIPTEN__) || defined(__native_client__)
++#  if defined(__native_client__)
+      /* no support */
+ #  elif defined WINRT || defined _WIN32_WCE
+      /* not supported */
+ #  elif defined __ANDROID__ || defined __linux__ || defined _WIN32 || \
+-        defined __FreeBSD__ || defined __bsdi__ || defined __HAIKU__
++        defined __FreeBSD__ || defined __bsdi__ || defined __HAIKU__ || \
++        defined(__EMSCRIPTEN__)
+ #      define OPENCV_HAVE_FILESYSTEM_SUPPORT 1
+ #  elif defined(__APPLE__)
+ #    include <TargetConditionals.h>
+diff --git a/modules/core/src/utils/filesystem.cpp b/modules/core/src/utils/filesystem.cpp
+index 4153234..42a3b24 100644
+--- a/modules/core/src/utils/filesystem.cpp
++++ b/modules/core/src/utils/filesystem.cpp
+@@ -34,7 +34,7 @@
+ #include <errno.h>
+ #include <io.h>
+ #include <stdio.h>
+-#elif defined __linux__ || defined __APPLE__ || defined __HAIKU__ || defined __FreeBSD__
++#elif defined __linux__ || defined __APPLE__ || defined __HAIKU__ || defined __FreeBSD__ || defined __EMSCRIPTEN__
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+@@ -194,7 +194,7 @@ cv::String getcwd()
+     sz = GetCurrentDirectoryA((DWORD)buf.size(), buf.data());
+     return cv::String(buf.data(), (size_t)sz);
+ #endif
+-#elif defined __linux__ || defined __APPLE__ || defined __HAIKU__ || defined __FreeBSD__
++#elif defined __linux__ || defined __APPLE__ || defined __HAIKU__ || defined __FreeBSD__ || defined __EMSCRIPTEN__
+     for(;;)
+     {
+         char* p = ::getcwd(buf.data(), buf.size());
+@@ -228,7 +228,7 @@ bool createDirectory(const cv::String& path)
+ #else
+     int result = _mkdir(path.c_str());
+ #endif
+-#elif defined __linux__ || defined __APPLE__ || defined __HAIKU__ || defined __FreeBSD__
++#elif defined __linux__ || defined __APPLE__ || defined __HAIKU__ || defined __FreeBSD__ || defined __EMSCRIPTEN__
+     int result = mkdir(path.c_str(), 0777);
+ #else
+     int result = -1;
+@@ -343,7 +343,7 @@ private:
+     Impl& operator=(const Impl&); // disabled
+ };
+ 
+-#elif defined __linux__ || defined __APPLE__ || defined __HAIKU__ || defined __FreeBSD__
++#elif defined __linux__ || defined __APPLE__ || defined __HAIKU__ || defined __FreeBSD__ || defined __EMSCRIPTEN__
+ 
+ struct FileLock::Impl
+ {
+@@ -457,7 +457,7 @@ cv::String getCacheDirectory(const char* sub_directory_name, const char* configu
+             default_cache_path = "/tmp/";
+             CV_LOG_WARNING(NULL, "Using world accessible cache directory. This may be not secure: " << default_cache_path);
+         }
+-#elif defined __linux__ || defined __HAIKU__ || defined __FreeBSD__
++#elif defined __linux__ || defined __HAIKU__ || defined __FreeBSD__ || defined __EMSCRIPTEN__
+         // https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
+         if (default_cache_path.empty())
+         {
+diff --git a/modules/js/CMakeLists.txt b/modules/js/CMakeLists.txt
+index 19f0b19..f9907ec 100644
+--- a/modules/js/CMakeLists.txt
++++ b/modules/js/CMakeLists.txt
+@@ -72,6 +72,7 @@ endif()
+ set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} --memory-init-file 0 -s TOTAL_MEMORY=128MB -s WASM_MEM_MAX=1GB -s ALLOW_MEMORY_GROWTH=1")
+ set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -s MODULARIZE=1")
+ set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -s EXPORT_NAME=\"'cv'\" -s DEMANGLE_SUPPORT=1")
++set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -s EXPORTED_RUNTIME_METHODS=FS")
+ set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -s FORCE_FILESYSTEM=1 --use-preload-plugins --bind --post-js ${JS_HELPER} ${COMPILE_FLAGS}")
+ set_target_properties(${the_module} PROPERTIES LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS}")
+ 
 diff --git a/modules/js/generator/embindgen.py b/modules/js/generator/embindgen.py
 index 8a16f92..a1a3187 100644
 --- a/modules/js/generator/embindgen.py
@@ -20,8 +101,20 @@ index 8a16f92..a1a3187 100644
              if variant.constret and ret_type.startswith('const') == False:
                  ret_type = 'const ' + ret_type
              if variant.refret and ret_type.endswith('&') == False:
+diff --git a/modules/js/src/core_bindings.cpp b/modules/js/src/core_bindings.cpp
+index 60fe496..eaba53e 100644
+--- a/modules/js/src/core_bindings.cpp
++++ b/modules/js/src/core_bindings.cpp
+@@ -465,6 +465,7 @@ EMSCRIPTEN_BINDINGS(binding_utils)
+     register_vector<cv::KeyPoint>("KeyPointVector");
+     register_vector<cv::DMatch>("DMatchVector");
+     register_vector<std::vector<cv::DMatch>>("DMatchVectorVector");
++    register_vector<std::string>("StringVector");
+ 
+ 
+     emscripten::class_<cv::Mat>("Mat")
 diff --git a/platforms/js/build_js.py b/platforms/js/build_js.py
-index 3e8edfe4ad..c1d3421a8b 100644
+index 3e8edfe..c1d3421 100644
 --- a/platforms/js/build_js.py
 +++ b/platforms/js/build_js.py
 @@ -69,10 +69,9 @@ class Builder:
@@ -74,20 +167,20 @@ index 3e8edfe4ad..c1d3421a8b 100644
  
      os.chdir(builder.build_dir)
 diff --git a/platforms/js/opencv_js.config.py b/platforms/js/opencv_js.config.py
-index 69891ea71a..abd8112016 100644
+index 69891ea..ada8801 100644
 --- a/platforms/js/opencv_js.config.py
 +++ b/platforms/js/opencv_js.config.py
-@@ -206,7 +206,11 @@ calib3d = {
+@@ -206,7 +206,12 @@ calib3d = {
      ],
  }
  
 -white_list = makeWhiteList([core, imgproc, objdetect, video, dnn, features2d, photo, calib3d])
 +wechat_qrcode = {
-+  'wechat_qrcode_WeChatQRCode': ['WeChatQRCode', 'detectAndDecode']
++    '': [],
++    'wechat_qrcode_WeChatQRCode': ['WeChatQRCode', 'detectAndDecode']
 +}
 +
-+white_list = makeWhiteList([core, imgproc, objdetect, video, dnn, features2d, photo, calib3d, wechat_qrcode])
++white_list = makeWhiteList([wechat_qrcode])
  
  # namespace_prefix_override['dnn'] = ''  # compatibility stuff (enabled by default)
  # namespace_prefix_override['aruco'] = ''  # compatibility stuff (enabled by default)
- 
