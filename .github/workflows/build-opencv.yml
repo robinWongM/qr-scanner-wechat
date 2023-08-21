@@ -38,7 +38,8 @@ jobs:
           ./emsdk activate 3.1.44
       - name: Patch OpenCV
         run: |-
-          patch opencv/platforms/js/build_js.py qr-scanner-wechat/build/opencv.patch
+          cd opencv
+          git apply ../qr-scanner-wechat/build/opencv.patch
       - name: Build OpenCV
         run: |-
           source ./emsdk/emsdk_env.sh
