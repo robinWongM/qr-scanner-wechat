@@ -30,7 +30,7 @@ jobs:
           ./emsdk activate 3.1.44
       - name: Patch OpenCV
         run: |-
-          patch build/opencv.patch opencv/platforms/js/build_js.py
+          patch opencv/platforms/js/build_js.py build/opencv.patch
       - name: Build OpenCV
         run: |-
           source ./emsdk/emsdk_env.sh
