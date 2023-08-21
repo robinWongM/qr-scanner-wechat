@@ -1,0 +1,33 @@
+name: Build OpenCV
+
+on:
+  push:
+    branches:
+      - build-wasm
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # https://docs.opencv.org/4.x/d4/da1/tutorial_js_setup.html
+      # https://emscripten.org/docs/getting_started/downloads.html
+      - name: Setup emscripten
+        run: |-
+          git clone https://github.com/emscripten-core/emsdk.git -b 3.1.44
+          cd emsdk
+          ./emsdk install 3.1.44
+          ./emsdk activate 3.1.44
+      - name: Setup opencv
+        run: |-
+          git clone https://github.com/opencv/opencv.git -b 4.8.0
+          patch build/opencv.patch opencv/platforms/js/build_js.py
+      - name: Build opencv
+        run: |-
+          source ./emsdk/emsdk_env.sh
+          emcmake python ./opencv/platforms/js/build_js.py build_js --build_wasm --disable_single_file
+          emcmake python ./opencv/platforms/js/build_js.py build_wasm --build_wasm
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: artifacts
+          path: ./opencv/build
