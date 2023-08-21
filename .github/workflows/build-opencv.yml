@@ -66,7 +66,7 @@ jobs:
           emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DEMSCRIPTEN_LINK_FLAGS='-s EXPORTED_RUNTIME_METHODS=FS'" --cmake_option="-DCMAKE_BUILD_TYPE=Debug"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.build }}
           path: ./build/bin
