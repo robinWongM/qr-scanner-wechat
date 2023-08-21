@@ -14,48 +14,56 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           path: qr-scanner-wechat
+
       - name: Checkout Emscripten
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: emscripten-core/emsdk
           ref: 3.1.44
           path: emsdk
+
       - name: Checkout OpenCV
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: opencv/opencv
           ref: 4.8.0
           path: opencv
+
       - name: Checkout OpenCV Contrib
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: opencv/opencv_contrib
           ref: 4.8.0
           path: opencv_contrib
+
       - name: Setup Emscripten
         run: |-
           cd emsdk
           ./emsdk install 3.1.44
           ./emsdk activate 3.1.44
+
       - name: Patch OpenCV
         run: |-
           cd opencv
           git apply ../qr-scanner-wechat/build/opencv.patch
+
       - name: Build OpenCV Release
         if: ${{ matrix.build == 'release' }}
         run: |-
           source ./emsdk/emsdk_env.sh
           emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules"
+
       - name: Build OpenCV Debug
         if: ${{ matrix.build == 'debug' }}
         run: |-
           source ./emsdk/emsdk_env.sh
           emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DCMAKE_BUILD_TYPE=Debug"
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: artifacts
+          name: ${{ matrix.build }}
           path: ./build
