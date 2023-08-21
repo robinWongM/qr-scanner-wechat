@@ -67,18 +67,6 @@ index 4153234..42a3b24 100644
          // https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
          if (default_cache_path.empty())
          {
-diff --git a/modules/js/CMakeLists.txt b/modules/js/CMakeLists.txt
-index 19f0b19..f9907ec 100644
---- a/modules/js/CMakeLists.txt
-+++ b/modules/js/CMakeLists.txt
-@@ -72,6 +72,7 @@ endif()
- set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} --memory-init-file 0 -s TOTAL_MEMORY=128MB -s WASM_MEM_MAX=1GB -s ALLOW_MEMORY_GROWTH=1")
- set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -s MODULARIZE=1")
- set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -s EXPORT_NAME=\"'cv'\" -s DEMANGLE_SUPPORT=1")
-+set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -s EXPORTED_RUNTIME_METHODS=FS")
- set(EMSCRIPTEN_LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS} -s FORCE_FILESYSTEM=1 --use-preload-plugins --bind --post-js ${JS_HELPER} ${COMPILE_FLAGS}")
- set_target_properties(${the_module} PROPERTIES LINK_FLAGS "${EMSCRIPTEN_LINK_FLAGS}")
- 
 diff --git a/modules/js/generator/embindgen.py b/modules/js/generator/embindgen.py
 index 8a16f92..a1a3187 100644
 --- a/modules/js/generator/embindgen.py
