@@ -9,19 +9,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # https://docs.opencv.org/4.x/d4/da1/tutorial_js_setup.html
-      # https://emscripten.org/docs/getting_started/downloads.html
-      - name: Setup emscripten
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Checkout Emscripten
+        uses: actions/checkout@v2
+        with:
+          repository: emscripten-core/emsdk
+          ref: 3.1.44
+          path: emsdk
+      - name: Checkout OpenCV
+        uses: actions/checkout@v2
+        with:
+          repository: opencv/opencv
+          ref: 4.8.0
+          path: opencv
+      - name: Setup Emscripten
         run: |-
-          git clone https://github.com/emscripten-core/emsdk.git -b 3.1.44
           cd emsdk
           ./emsdk install 3.1.44
           ./emsdk activate 3.1.44
-      - name: Setup opencv
+      - name: Patch OpenCV
         run: |-
-          git clone https://github.com/opencv/opencv.git -b 4.8.0
           patch build/opencv.patch opencv/platforms/js/build_js.py
-      - name: Build opencv
+      - name: Build OpenCV
         run: |-
           source ./emsdk/emsdk_env.sh
           emcmake python ./opencv/platforms/js/build_js.py build_js --build_wasm --disable_single_file
