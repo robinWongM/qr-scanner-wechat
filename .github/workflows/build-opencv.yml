@@ -53,7 +53,7 @@ jobs:
         if: ${{ matrix.build == 'debug' }}
         run: |-
           source ./emsdk/emsdk_env.sh
-          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules -DCMAKE_BUILD_TYPE=Debug"
+          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DCMAKE_BUILD_TYPE=Debug"
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
