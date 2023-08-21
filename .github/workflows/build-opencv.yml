@@ -52,6 +52,8 @@ jobs:
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}-${{ matrix.build }}
 
       - name: Build OpenCV Release
         if: ${{ matrix.build == 'release' }}
