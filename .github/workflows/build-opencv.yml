@@ -12,14 +12,23 @@ jobs:
         include:
           - build: debug
           - build: release
-            optimization: -Oz
+            flags: -Oz
           - build: release
-            optimization: -O3
+            flags: -O3
           - build: release
-            optimization: -Os
+            flags: -Os
+          - build: release
+            flags: -Oz -fno-rtti -fno-exceptions
+          - build: release
+            flags: -O3 -fno-rtti -fno-exceptions
+          - build: release
+            flags: -Os -fno-rtti -fno-exceptions
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -60,13 +69,13 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ github.job }}-${{ matrix.build }}-${{ matrix.optimization }}
+          key: ${{ github.job }}-${{ matrix.build }}-${{ matrix.flags }}
 
       - name: Build OpenCV Release
         if: ${{ matrix.build == 'release' }}
         run: |-
           source ./emsdk/emsdk_env.sh
-          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DEMSCRIPTEN_LINK_FLAGS='-s EXPORTED_RUNTIME_METHODS=FS'" --build_flags="${{ matrix.optimization }}"
+          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DEMSCRIPTEN_LINK_FLAGS='-s EXPORTED_RUNTIME_METHODS=FS'" --build_flags="${{ matrix.flags }}"
 
       - name: Build OpenCV Debug
         if: ${{ matrix.build == 'debug' }}
@@ -77,5 +86,5 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.build }}-${{ matrix.optimization }}
+          name: ${{ matrix.build }}-${{ matrix.flags }}
           path: ./build/bin
