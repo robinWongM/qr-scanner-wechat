@@ -72,13 +72,13 @@ jobs:
         if: ${{ matrix.build == 'release' }}
         run: |-
           source ./emsdk/emsdk_env.sh
-          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DEMSCRIPTEN_LINK_FLAGS='-s EXPORTED_RUNTIME_METHODS=FS'" --cmake_option="-DCMAKE_CXX_FLAGS_RELEASE='${{ matrix.flags }}'"
+          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DEMSCRIPTEN_LINK_FLAGS='-s EXPORTED_RUNTIME_METHODS=FS'" --cmake_option="-DCMAKE_CXX_FLAGS_RELEASE='${{ matrix.flags }}'" --build_test --build_perf
 
       - name: Build OpenCV Debug
         if: ${{ matrix.build == 'debug' }}
         run: |-
           source ./emsdk/emsdk_env.sh
-          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DEMSCRIPTEN_LINK_FLAGS='-s EXPORTED_RUNTIME_METHODS=FS'" --cmake_option="-DCMAKE_BUILD_TYPE=Debug"
+          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DEMSCRIPTEN_LINK_FLAGS='-s EXPORTED_RUNTIME_METHODS=FS'" --cmake_option="-DCMAKE_BUILD_TYPE=Debug" --build_test --build_perf
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
