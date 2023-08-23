@@ -17,12 +17,12 @@ jobs:
             flags: -O3
           - build: release
             flags: -Os
-          - build: release
-            flags: -Oz -fno-rtti -fno-exceptions
-          - build: release
-            flags: -O3 -fno-rtti -fno-exceptions
-          - build: release
-            flags: -Os -fno-rtti -fno-exceptions
+          # - build: release
+          #   flags: -Oz -fno-rtti -fno-exceptions
+          # - build: release
+          #   flags: -O3 -fno-rtti -fno-exceptions
+          # - build: release
+          #   flags: -Os -fno-rtti -fno-exceptions
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
