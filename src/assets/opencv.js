@@ -333,10 +333,10 @@ export const cv = (() => {
     function receiveInstance(instance, module) {
       const exports = instance.exports
       Module.asm = exports
-      wasmMemory = Module.asm.Y
+      wasmMemory = Module.asm.X
       updateGlobalBufferAndViews(wasmMemory.buffer)
-      wasmTable = Module.asm.$
-      addOnInit(Module.asm.Z)
+      wasmTable = Module.asm._
+      addOnInit(Module.asm.Y)
       removeRunDependency('wasm-instantiate')
     }
     addRunDependency('wasm-instantiate')
@@ -3090,6 +3090,15 @@ export const cv = (() => {
       return -e.errno
     }
   }
+  function ___syscall_stat64(path, buf) {
+    try {
+      path = SYSCALLS.getStr(path)
+      return SYSCALLS.doStat(FS.stat, path, buf)
+    } catch (e) {
+      if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e
+      return -e.errno
+    }
+  }
   const tupleRegistrations = {}
   function runDestructors(destructors) {
     while (destructors.length) {
@@ -4590,6 +4599,9 @@ export const cv = (() => {
   function _abort() {
     abort('')
   }
+  function _emscripten_date_now() {
+    return Date.now()
+  }
   function _emscripten_get_heap_max() {
     return 1073741824
   }
@@ -4927,105 +4939,104 @@ export const cv = (() => {
     return intArrayFromBase64(filename.slice(dataURIPrefix.length))
   }
   var asmLibraryArg = {
-    r: ___cxa_allocate_exception,
     q: ___cxa_throw,
-    E: ___syscall_fcntl64,
-    O: ___syscall_ioctl,
-    D: ___syscall_openat,
-    W: __embind_finalize_value_array,
+    C: ___syscall_fcntl64,
+    N: ___syscall_ioctl,
+    B: ___syscall_openat,
+    K: ___syscall_stat64,
+    V: __embind_finalize_value_array,
     i: __embind_finalize_value_object,
-    I: __embind_register_bigint,
-    U: __embind_register_bool,
+    G: __embind_register_bigint,
+    T: __embind_register_bool,
     k: __embind_register_class,
-    s: __embind_register_class_class_function,
-    f: __embind_register_class_constructor,
+    r: __embind_register_class_class_function,
+    g: __embind_register_class_constructor,
     b: __embind_register_class_function,
     n: __embind_register_class_property,
     a: __embind_register_constant,
-    T: __embind_register_emval,
-    G: __embind_register_float,
+    S: __embind_register_emval,
+    E: __embind_register_float,
     h: __embind_register_function,
     p: __embind_register_integer,
-    g: __embind_register_memory_view,
-    F: __embind_register_std_string,
-    B: __embind_register_std_wstring,
-    X: __embind_register_value_array,
-    x: __embind_register_value_array_element,
+    f: __embind_register_memory_view,
+    D: __embind_register_std_string,
+    z: __embind_register_std_wstring,
+    W: __embind_register_value_array,
+    w: __embind_register_value_array_element,
     j: __embind_register_value_object,
     c: __embind_register_value_object_field,
-    V: __embind_register_void,
-    R: __emscripten_date_now,
-    Q: __emscripten_get_now_is_monotonic,
+    U: __embind_register_void,
+    P: __emscripten_get_now_is_monotonic,
     l: __emval_call_void_method,
     e: __emval_decref,
     m: __emval_get_method_caller,
     o: __emval_incref,
-    t: __emval_new_array,
-    w: __emval_new_cstring,
-    u: __emval_set_property,
+    s: __emval_new_array,
+    v: __emval_new_cstring,
+    t: __emval_set_property,
     d: __emval_take_value,
-    y: _abort,
-    L: _emscripten_get_heap_max,
-    P: _emscripten_get_now,
-    S: _emscripten_memcpy_big,
-    K: _emscripten_resize_heap,
-    M: _environ_get,
-    N: _environ_sizes_get,
-    A: _fd_close,
-    C: _fd_read,
-    H: _fd_seek,
-    z: _fd_write,
-    v: _setTempRet0,
-    J: () => {},
+    u: _abort,
+    Q: _emscripten_date_now,
+    J: _emscripten_get_heap_max,
+    O: _emscripten_get_now,
+    R: _emscripten_memcpy_big,
+    I: _emscripten_resize_heap,
+    L: _environ_get,
+    M: _environ_sizes_get,
+    y: _fd_close,
+    A: _fd_read,
+    F: _fd_seek,
+    x: _fd_write,
+    H: () => { throw new Error('strftime is not available on this system') },
   }
   const asm = createWasm()
   var ___wasm_call_ctors = (Module.___wasm_call_ctors = function () {
-    return (___wasm_call_ctors = Module.___wasm_call_ctors = Module.asm.Z).apply(null, arguments)
+    return (___wasm_call_ctors = Module.___wasm_call_ctors = Module.asm.Y).apply(null, arguments)
   })
   var _malloc = (Module._malloc = function () {
-    return (_malloc = Module._malloc = Module.asm._).apply(null, arguments)
+    return (_malloc = Module._malloc = Module.asm.Z).apply(null, arguments)
   })
   var _free = (Module._free = function () {
-    return (_free = Module._free = Module.asm.aa).apply(null, arguments)
+    return (_free = Module._free = Module.asm.$).apply(null, arguments)
   })
   var ___errno_location = (Module.___errno_location = function () {
-    return (___errno_location = Module.___errno_location = Module.asm.ba).apply(null, arguments)
+    return (___errno_location = Module.___errno_location = Module.asm.aa).apply(null, arguments)
   })
   var ___getTypeName = (Module.___getTypeName = function () {
-    return (___getTypeName = Module.___getTypeName = Module.asm.ca).apply(null, arguments)
+    return (___getTypeName = Module.___getTypeName = Module.asm.ba).apply(null, arguments)
   })
   var ___embind_register_native_and_builtin_types = (Module.___embind_register_native_and_builtin_types = function () {
-    return (___embind_register_native_and_builtin_types = Module.___embind_register_native_and_builtin_types = Module.asm.da).apply(null, arguments)
+    return (___embind_register_native_and_builtin_types = Module.___embind_register_native_and_builtin_types = Module.asm.ca).apply(null, arguments)
   })
   var ___cxa_is_pointer_type = (Module.___cxa_is_pointer_type = function () {
-    return (___cxa_is_pointer_type = Module.___cxa_is_pointer_type = Module.asm.ea).apply(null, arguments)
+    return (___cxa_is_pointer_type = Module.___cxa_is_pointer_type = Module.asm.da).apply(null, arguments)
   })
   var dynCall_ji = (Module.dynCall_ji = function () {
-    return (dynCall_ji = Module.dynCall_ji = Module.asm.fa).apply(null, arguments)
+    return (dynCall_ji = Module.dynCall_ji = Module.asm.ea).apply(null, arguments)
   })
   var dynCall_jiii = (Module.dynCall_jiii = function () {
-    return (dynCall_jiii = Module.dynCall_jiii = Module.asm.ga).apply(null, arguments)
+    return (dynCall_jiii = Module.dynCall_jiii = Module.asm.fa).apply(null, arguments)
   })
   var dynCall_jii = (Module.dynCall_jii = function () {
-    return (dynCall_jii = Module.dynCall_jii = Module.asm.ha).apply(null, arguments)
+    return (dynCall_jii = Module.dynCall_jii = Module.asm.ga).apply(null, arguments)
   })
   var dynCall_viji = (Module.dynCall_viji = function () {
-    return (dynCall_viji = Module.dynCall_viji = Module.asm.ia).apply(null, arguments)
+    return (dynCall_viji = Module.dynCall_viji = Module.asm.ha).apply(null, arguments)
   })
   var dynCall_jiji = (Module.dynCall_jiji = function () {
-    return (dynCall_jiji = Module.dynCall_jiji = Module.asm.ja).apply(null, arguments)
+    return (dynCall_jiji = Module.dynCall_jiji = Module.asm.ia).apply(null, arguments)
   })
   var dynCall_viijii = (Module.dynCall_viijii = function () {
-    return (dynCall_viijii = Module.dynCall_viijii = Module.asm.ka).apply(null, arguments)
+    return (dynCall_viijii = Module.dynCall_viijii = Module.asm.ja).apply(null, arguments)
   })
   var dynCall_iiiiij = (Module.dynCall_iiiiij = function () {
-    return (dynCall_iiiiij = Module.dynCall_iiiiij = Module.asm.la).apply(null, arguments)
+    return (dynCall_iiiiij = Module.dynCall_iiiiij = Module.asm.ka).apply(null, arguments)
   })
   var dynCall_iiiiijj = (Module.dynCall_iiiiijj = function () {
-    return (dynCall_iiiiijj = Module.dynCall_iiiiijj = Module.asm.ma).apply(null, arguments)
+    return (dynCall_iiiiijj = Module.dynCall_iiiiijj = Module.asm.la).apply(null, arguments)
   })
   var dynCall_iiiiiijj = (Module.dynCall_iiiiiijj = function () {
-    return (dynCall_iiiiiijj = Module.dynCall_iiiiiijj = Module.asm.na).apply(null, arguments)
+    return (dynCall_iiiiiijj = Module.dynCall_iiiiiijj = Module.asm.ma).apply(null, arguments)
   })
   Module.addRunDependency = addRunDependency
   Module.removeRunDependency = removeRunDependency
