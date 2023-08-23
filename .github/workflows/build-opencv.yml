@@ -10,6 +10,14 @@ jobs:
     strategy:
       matrix:
         build: [release, debug]
+        include:
+          - build: debug
+          - build: release
+            optimization: -Oz
+          - build: release
+            optimization: -O3
+          - build: release
+            optimization: -Os
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -53,13 +61,13 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ github.job }}-${{ matrix.build }}
+          key: ${{ github.job }}-${{ matrix.build }}-${{ matrix.optimization }}
 
       - name: Build OpenCV Release
         if: ${{ matrix.build == 'release' }}
         run: |-
           source ./emsdk/emsdk_env.sh
-          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DEMSCRIPTEN_LINK_FLAGS='-s EXPORTED_RUNTIME_METHODS=FS'" --build_flags="-Os"
+          emcmake python ./opencv/platforms/js/build_js.py build --build_wasm --disable_single_file --cmake_option="-DOPENCV_EXTRA_MODULES_PATH=$GITHUB_WORKSPACE/opencv_contrib/modules" --cmake_option="-DEMSCRIPTEN_LINK_FLAGS='-s EXPORTED_RUNTIME_METHODS=FS'" --build_flags="${{ matrix.optimization }}"
 
       - name: Build OpenCV Debug
         if: ${{ matrix.build == 'debug' }}
