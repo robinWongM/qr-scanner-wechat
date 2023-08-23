@@ -26,9 +26,6 @@ jobs:
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -88,3 +85,7 @@ jobs:
         with:
           name: ${{ matrix.build }}-${{ matrix.flags }}
           path: ./build/bin
+
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+        if: ${{ failure() }}
