@@ -12,6 +12,12 @@ export default defineBuildConfig({
   rollup: {
     emitCJS: false,
     cjsBridge: false,
+    replace: {
+      delimiters: ['', ''],
+      values: {
+        'const stdStringIsUTF8 = name === \'std::string\'': 'const stdStringIsUTF8 = name === false',
+      },
+    },
   },
   hooks: {
     'rollup:options': function (ctx, options) {
