@@ -1,5 +1,6 @@
 export interface ScanResult {
   text: string | null
+  raw: Uint8Array
   rect?: {
     x: number
     y: number
@@ -85,8 +86,13 @@ export async function scan(input: ImageSource, options: ScanOptions = {}): Promi
 
   inputImage.delete()
 
+  const bytesArray = (res.get(0) as string | null)?.split('').map(c => c.charCodeAt(0))
+  const raw = new Uint8Array(bytesArray ?? [])
+  const text = new TextDecoder().decode(raw)
+
   return {
-    text: res.get(0),
+    text,
+    raw,
     rect,
     rectCanvas,
   }
